@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>道歉小魔盒 💝</title>
+<style>
+:root {
+  --pink: #E8B4B8;
+  --pink-light: #F5E6E8;
+  --pink-dark: #C48B8F;
+  --blue-heal: #B8D4E3;
+  --cream: #FFF8F0;
+  --text: #5A4A4A;
+  --text-light: #8A7A7A;
+  --gold: #D4A574;
+  --red-soft: #E07070;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+  min-height:100vh; overflow:hidden;
+  background: linear-gradient(135deg, var(--pink-light) 0%, var(--cream) 50%, var(--blue-heal) 100%);
+  display:flex; align-items:center; justify-content:center;
+  touch-action:manipulation; user-select:none;
+  -webkit-user-select:none;
+}
+
+/* 飘落的爱心背景 */
+.hearts-bg { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+.heart-float {
+  position:absolute; font-size:20px; opacity:0.15;
+  animation: floatDown linear infinite;
+}
+@keyframes floatDown {
+  0% { transform:translateY(-50px) rotate(0deg); opacity:0.15; }
+  100% { transform:translateY(110vh) rotate(360deg); opacity:0; }
+}
+
+/* 主容器 */
+#app { position:relative; z-index:10; width:100%; max-width:420px; padding:20px; text-align:center; }
+
+/* ===== 启动器界面 ===== */
+#launcher {
+  animation: breathe 3s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.02)} }
+
+.box-wrapper {
+  background: var(--cream);
+  border: 3px solid var(--pink);
+  border-radius: 24px;
+  padding: 40px 30px;
+  box-shadow: 0 8px 32px rgba(200,140,140,0.2), inset 0 2px 8px rgba(255,255,255,0.5);
+  position:relative;
+  overflow:hidden;
+}
+.box-wrapper::before {
+  content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  animation: shimmer 4s ease-in-out infinite;
+}
+@keyframes shimmer { 0%,100%{transform:translate(-30%,-30%)} 50%{transform:translate(30%,30%)} }
+
+.box-icon {
+  font-size: 80px;
+  animation: wobble 2s ease-in-out infinite;
+  cursor:pointer;
+  position:relative; z-index:1;
+}
+@keyframes wobble {
+  0%,100%{transform:rotate(-3deg)} 25%{transform:rotate(3deg)} 50%{transform:rotate(-3deg)} 75%{transform:rotate(2deg)}
+}
+.box-label {
+  margin-top:16px; font-size:22px; font-weight:700; color:var(--text);
+  letter-spacing:2px; position:relative; z-index:1;
+}
+.box-sublabel {
+  margin-top:8px; font-size:13px; color:var(--text-light);
+  position:relative; z-index:1;
+}
+.box-hint {
+  margin-top:24px; font-size:12px; color:var(--pink-dark);
+  animation: pulse 2s ease-in-out infinite;
+  position:relative; z-index:1;
+}
+@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+
+.ribbon {
+  position:absolute; top:16px; right:-30px;
+  background:var(--red-soft); color:#fff;
+  padding:4px 40px; font-size:11px; font-weight:700;
+  transform:rotate(45deg); letter-spacing:1px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  z-index:2;
+}
+
+/* ===== 道歉小人弹出界面 ===== */
+#stage { display:none; }
+
+.character-card {
+  background: var(--cream);
+  border: 3px solid var(--pink);
+  border-radius: 24px;
+  padding: 30px 24px;
+  box-shadow: 0 8px 32px rgba(200,140,140,0.25);
+  animation: popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+  position:relative;
+}
+@keyframes popIn {
+  0%{transform:scale(0) rotate(-10deg); opacity:0}
+  100%{transform:scale(1) rotate(0); opacity:1}
+}
+
+.char-emoji { font-size:100px; line-height:1.1; }
+.char-action {
+  margin-top:8px; font-size:14px; color:var(--pink-dark);
+  font-style:italic;
+}
+
+/* 对话气泡 */
+.speech-bubble {
+  background:#fff; border:2px solid var(--pink);
+  border-radius:18px; padding:16px 20px;
+  margin-top:16px; position:relative;
+  font-size:15px; line-height:1.6; color:var(--text);
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
+.speech-bubble::before {
+  content:''; position:absolute; top:-10px; left:50%; transform:translateX(-50%);
+  border-left:10px solid transparent; border-right:10px solid transparent;
+  border-bottom:10px solid var(--pink);
+}
+.speech-bubble::after {
+  content:''; position:absolute; top:-7px; left:50%; transform:translateX(-50%);
+  border-left:8px solid transparent; border-right:8px solid transparent;
+  border-bottom:8px solid #fff;
+}
+
+/* 礼物卡 */
+.gift-card {
+  margin-top:16px; background:linear-gradient(135deg, #FFF5E6, #FFE8D6);
+  border:2px dashed var(--gold); border-radius:14px;
+  padding:14px 18px;
+  animation: giftShine 2s ease-in-out infinite;
+}
+@keyframes giftShine { 0%,100%{box-shadow:0 0 0 rgba(212,165,116,0)} 50%{box-shadow:0 0 16px rgba(212,165,116,0.3)} }
+.gift-icon { font-size:28px; }
+.gift-text { font-size:13px; color:var(--gold); margin-top:4px; font-weight:600; }
+
+/* 计数器 */
+.counter {
+  margin-top:20px; font-size:12px; color:var(--text-light);
+}
+.counter span { color:var(--red-soft); font-weight:700; font-size:14px; }
+
+/* 操作提示 */
+.tap-hint {
+  margin-top:16px; font-size:12px; color:var(--pink-dark);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ===== 晕倒界面 ===== */
+#fainted { display:none; }
+.fainted-card {
+  background: var(--cream);
+  border: 3px solid var(--red-soft);
+  border-radius: 24px;
+  padding: 40px 24px;
+  box-shadow: 0 8px 32px rgba(224,112,112,0.2);
+  animation: popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.fainted-emoji { font-size:80px; animation: spin 2s linear; }
+@keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(720deg)} }
+.fainted-text { margin-top:16px; font-size:18px; font-weight:700; color:var(--red-soft); }
+.fainted-sub { margin-top:8px; font-size:14px; color:var(--text-light); line-height:1.6; }
+
+.forgive-btn {
+  margin-top:24px; padding:14px 48px;
+  background: linear-gradient(135deg, var(--pink), var(--red-soft));
+  color:#fff; border:none; border-radius:30px;
+  font-size:16px; font-weight:700; cursor:pointer;
+  box-shadow:0 4px 16px rgba(224,112,112,0.3);
+  transition:all 0.3s; letter-spacing:2px;
+}
+.forgive-btn:hover { transform:scale(1.05); box-shadow:0 6px 24px rgba(224,112,112,0.4); }
+.forgive-btn:active { transform:scale(0.98); }
+
+/* ===== 原谅成功界面 ===== */
+#forgiven { display:none; }
+.forgiven-card {
+  background: var(--cream);
+  border: 3px solid var(--gold);
+  border-radius: 24px;
+  padding: 40px 24px;
+  box-shadow: 0 8px 32px rgba(212,165,116,0.3);
+  animation: popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.forgiven-emoji { font-size:80px; }
+.forgiven-text { margin-top:16px; font-size:20px; font-weight:700; color:var(--gold); }
+.forgiven-sub { margin-top:12px; font-size:14px; color:var(--text); line-height:1.8; }
+
+/* 摇晃反馈 */
+.shake-feedback { animation: shakeIt 0.3s ease-in-out; }
+@keyframes shakeIt {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)}
+  60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
+}
+
+/* 鸵鸟动画 */
+.ostrich-anim .char-emoji {
+  animation: ostrichPull 1.5s ease-out;
+}
+@keyframes ostrichPull {
+  0%{transform:translateY(60px); opacity:0.3}
+  40%{transform:translateY(20px); opacity:0.6}
+  70%{transform:translateY(-10px); opacity:1}
+  100%{transform:translateY(0); opacity:1}
+}
+
+/* 爱心爆炸 */
+.love-burst {
+  position:fixed; pointer-events:none; z-index:999;
+  font-size:24px;
+  animation: burstUp 1s ease-out forwards;
+}
+@keyframes burstUp {
+  0%{transform:translateY(0) scale(0); opacity:1}
+  50%{transform:translateY(-60px) scale(1.2); opacity:0.8}
+  100%{transform:translateY(-120px) scale(0.5); opacity:0}
+}
+
+/* 踢飞按钮 */
+.kick-btn {
+  margin-top:0; padding:14px 36px;
+  background: linear-gradient(135deg, #8B8B8B, #5A5A5A);
+  color:#fff; border:none; border-radius:30px;
+  font-size:15px; font-weight:700; cursor:pointer;
+  box-shadow:0 4px 16px rgba(90,90,90,0.3);
+  transition:all 0.3s; letter-spacing:1px;
+}
+.kick-btn:hover { transform:scale(1.05); background:linear-gradient(135deg,#666,#444); }
+.kick-btn:active { transform:scale(0.95); }
+
+/* 踢飞界面 */
+#kicked { display:none; }
+.kicked-card {
+  background: linear-gradient(180deg, #0a0a2e 0%, #1a1a4e 40%, #2a1a3e 100%);
+  border: 3px solid #4a3a8a;
+  border-radius: 24px;
+  padding: 30px 24px;
+  box-shadow: 0 8px 32px rgba(74,58,138,0.4);
+  overflow:hidden; position:relative;
+  color:#fff;
+}
+.kicked-scene {
+  height:200px; position:relative; overflow:hidden;
+  border-radius:16px; margin-bottom:16px;
+  background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1e 100%);
+}
+.stars-layer {
+  position:absolute; inset:0;
+}
+.star {
+  position:absolute; background:#fff; border-radius:50%;
+  animation: twinkle 2s ease-in-out infinite alternate;
+}
+@keyframes twinkle { 0%{opacity:0.3;transform:scale(0.8)} 100%{opacity:1;transform:scale(1.2)} }
+
+.kicked-char {
+  position:absolute; font-size:50px;
+  left:50%; top:50%; transform:translate(-50%,-50%);
+  transition: all 0.1s linear;
+  filter: drop-shadow(0 0 10px rgba(255,200,100,0.6));
+}
+.kick-anim {
+  animation: kickFly 2s cubic-bezier(0.2,0.8,0.3,1) forwards;
+}
+@keyframes kickFly {
+  0% { left:20%; top:80%; font-size:50px; transform:translate(-50%,-50%) rotate(0deg); }
+  20% { left:30%; top:40%; font-size:45px; transform:translate(-50%,-50%) rotate(180deg); }
+  50% { left:50%; top:20%; font-size:35px; transform:translate(-50%,-50%) rotate(540deg); }
+  80% { left:70%; top:10%; font-size:20px; transform:translate(-50%,-50%) rotate(900deg); }
+  100% { left:80%; top:5%; font-size:8px; transform:translate(-50%,-50%) rotate(1440deg); opacity:0.3; }
+}
+.kick-anim-again {
+  animation: kickFlyAgain 2.5s cubic-bezier(0.1,0.9,0.2,1) forwards;
+}
+@keyframes kickFlyAgain {
+  0% { left:50%; top:50%; font-size:40px; transform:translate(-50%,-50%) rotate(0deg); opacity:1; }
+  30% { left:60%; top:20%; font-size:30px; transform:translate(-50%,-50%) rotate(720deg); }
+  60% { left:75%; top:8%; font-size:15px; transform:translate(-50%,-50%) rotate(1440deg); }
+  100% { left:90%; top:2%; font-size:4px; transform:translate(-50%,-50%) rotate(2880deg); opacity:0.1; }
+}
+
+.kicked-text {
+  font-size:22px; font-weight:700; color:#FFD700;
+  text-shadow:0 0 12px rgba(255,215,0,0.5);
+  animation: flashText 0.5s ease-in-out 3;
+}
+@keyframes flashText { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+.kicked-location {
+  margin-top:10px; font-size:14px; color:#aaa;
+  font-style:italic;
+}
+.kicked-distance {
+  margin-top:8px; font-size:16px; color:#7af;
+}
+.kicked-distance span { font-weight:700; font-size:20px; color:#5df; }
+.kicked-cry {
+  margin-top:14px; font-size:14px; color:#f9a;
+  animation: pulse 2s ease-in-out infinite;
+}
+.kicked-btns {
+  margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+}
+
+/* BGM 控制按钮 */
+.bgm-btn {
+  position:fixed; top:16px; right:16px; z-index:9999;
+  width:44px; height:44px; border-radius:50%;
+  background:rgba(255,255,255,0.85); border:2px solid var(--pink);
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; cursor:pointer;
+  box-shadow:0 2px 12px rgba(200,140,140,0.2);
+  transition:all 0.3s;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+.bgm-btn:hover { transform:scale(1.1); box-shadow:0 4px 16px rgba(200,140,140,0.3); }
+.bgm-btn:active { transform:scale(0.95); }
+.bgm-btn.playing { animation: musicPulse 1s ease-in-out infinite; }
+@keyframes musicPulse { 0%,100%{box-shadow:0 2px 12px rgba(200,140,140,0.2)} 50%{box-shadow:0 2px 20px rgba(232,180,184,0.5)} }
+
+</style>
+</head>
+<body>
+
+
+<audio id="bgmAudio" loop preload="auto">
+  <source src="bgm.mp3" type="audio/mpeg">
+</audio>
+<button class="bgm-btn" id="bgmBtn" title="背景音乐">🔇</button>
+
+<div class="hearts-bg" id="heartsBg"></div>
+
+<div id="app">
+  <!-- 启动器 -->
+  <div id="launcher">
+    <div class="box-wrapper" id="boxWrapper">
+      <div class="ribbon">限量版</div>
+      <div class="box-icon" id="boxIcon">📦</div>
+      <div class="box-label">内含道歉笨蛋 ×1</div>
+      <div class="box-sublabel">⚠️ 警告：内容物极度诚恳，可能引起心软</div>
+      <div class="box-hint">👆 点击打开 · 📱 摇一摇拆盒</div>
+    </div>
+  </div>
+
+  <!-- 道歉小人舞台 -->
+  <div id="stage">
+    <div class="character-card" id="charCard">
+      <div class="char-emoji" id="charEmoji"></div>
+      <div class="char-action" id="charAction"></div>
+      <div class="speech-bubble" id="speechBubble"></div>
+      <div class="gift-card" id="giftCard">
+        <div class="gift-icon" id="giftIcon"></div>
+        <div class="gift-text" id="giftText"></div>
+      </div>
+      <div class="counter">已收集 <span id="countNum">0</span> / <span id="countTotal"></span> 种道歉</div>
+      <div class="tap-hint">继续点击 / 摇一摇 → 解锁更多道歉</div>
+    </div>
+  </div>
+
+  <!-- 晕倒界面 -->
+  <div id="fainted">
+    <div class="fainted-card">
+      <div class="fainted-emoji">🥴</div>
+      <div class="fainted-text">小人已经晕倒了...</div>
+      <div class="fainted-sub">
+        他被摇了太多次，急需你的原谅才能复活！<br>
+        再不原谅他就要变成一摊烂泥了 😭
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button class="forgive-btn" id="forgiveBtn">💕 好吧，原谅你了</button>
+        <button class="kick-btn" id="kickBtn">👟 不原谅！踢飞他！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 踢飞界面 -->
+  <div id="kicked">
+    <div class="kicked-card" id="kickedCard">
+      <div class="kicked-scene" id="kickedScene">
+        <div class="stars-layer" id="starsLayer"></div>
+        <div class="kicked-char" id="kickedChar">🧎‍♂️</div>
+      </div>
+      <div class="kicked-text" id="kickedText">嗖————！！！</div>
+      <div class="kicked-location" id="kickedLocation">正在飞向：银河系边缘...</div>
+      <div class="kicked-distance" id="kickedDistance">已飞行：<span id="distNum">0</span> 光年</div>
+      <div class="kicked-cry" id="kickedCry">😭 "我在太空好冷，原谅我吧——"</div>
+      <div class="kicked-btns" id="kickedBtns" style="display:none;">
+        <button class="forgive-btn" id="kickForgiveBtn">💕 好吧，接你回来</button>
+        <button class="kick-btn" id="kickAgainBtn">👟 继续踢！踢到仙女座！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 原谅成功 -->
+  <div id="forgiven">
+    <div class="forgiven-card">
+      <div class="forgiven-emoji">🥹💕</div>
+      <div class="forgiven-text">谢谢你愿意原谅我</div>
+      <div class="forgiven-sub" id="forgivenMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 道歉小魔盒 - 核心逻辑
+// ============================================================
+(function(){
+'use strict';
+
+// ── 道歉数据库 ──
+const APOLOGIES = [
+  {
+    emoji: '🧎‍♂️', action: '— 土下座跪地求饶中 —',
+    msg: '对不起对不起对不起！我知道错了，错得离谱，错得彻底，请收下我的膝盖！',
+    giftIcon: '🎫', giftText: '【兑换券】任意撒娇一次，无条件配合'
+  },
+  {
+    emoji: '🍳', action: '— 端着热腾腾的早饭跑来 —',
+    msg: '以后每天早上，要么亲手做，要么秒点外卖，绝不让你饿着肚子出门！',
+    giftIcon: '🥞', giftText: '【无限期早饭外卖卡】你爱吃的那家，随时点'
+  },
+  {
+    emoji: '😭', action: '— 大哭中，鼻涕泡都出来了 —',
+    msg: '呜呜呜我真的知道错了...你不理我的每一秒钟都好难熬...',
+    giftIcon: '🧸', giftText: '【抱抱券】可兑换一个超长拥抱（不少于3分钟）'
+  },
+  {
+    emoji: '🪧', action: '— 举着"我错了"的大牌子 —',
+    msg: '全世界都可以说我笨，但我不能让你因为我的笨而难过。我会改的！',
+    giftIcon: '💌', giftText: '【手写信】回家后亲手写一封道歉信给你'
+  },
+  {
+    emoji: '🙇‍♂️', action: '— 90度鞠躬 —',
+    msg: '是我不好，不应该逃避问题。你说得对，我以后会正面面对，不当鸵鸟了。',
+    giftIcon: '🍰', giftText: '【甜品券】周末带你去吃那家你一直想去的蛋糕店'
+  },
+  {
+    emoji: '🐕', action: '— 变成小狗狗，摇尾巴求原谅 —',
+    msg: '汪汪汪！（翻译：主人我错了，摸摸头就原谅我吧）',
+    giftIcon: '🎬', giftText: '【电影券】你选片，我买票+爆米花+奶茶全包'
+  },
+  {
+    emoji: '🌹', action: '— 单膝跪地献花 —',
+    msg: '这朵花代表我所有的歉意。你值得被好好对待，而我会做得更好。',
+    giftIcon: '💐', giftText: '【鲜花订阅】每周一束花，连续一个月'
+  },
+  {
+    emoji: '👨‍🍳', action: '— 系上围裙准备下厨 —',
+    msg: '今晚我来做饭！你想吃什么都行，就算翻车了也请给我一个重新来过的机会...',
+    giftIcon: '🍜', giftText: '【私人厨师卡】本周晚饭全部由我承包'
+  },
+  // 鸵鸟特别款
+  {
+    emoji: '🦤', action: '— 把头从沙子里拔出来 —',
+    msg: '我拔出来了！不要再嫌弃我是鸵鸟了好不好？我保证以后有问题就面对，不逃避！',
+    giftIcon: '🏃', giftText: '【勇气券】下次吵架我保证不跑，留下来好好说',
+    special: 'ostrich'
+  },
+  {
+    emoji: '🤡', action: '— 扮小丑逗你笑 —',
+    msg: '如果我的道歉不够真诚，那我就当小丑逗你开心，直到你笑为止！',
+    giftIcon: '🎪', giftText: '【快乐基金】存100块，专门用来买让你开心的东西'
+  },
+  {
+    emoji: '📝', action: '— 认真写检讨书 —',
+    msg: '检讨书第一条：不应该在你生气的时候装死。第二条：不应该让你饿着。第三条：以上错误绝不再犯。',
+    giftIcon: '✅', giftText: '【承诺卡】以上条款具有法律效力（大概）'
+  },
+  {
+    emoji: '🧹', action: '— 拿着扫把准备做家务 —',
+    msg: '从今天起，家务我全包一个月！地板会亮到能当镜子照！',
+    giftIcon: '🏠', giftText: '【家务全包月卡】洗碗拖地洗衣服，统统我来'
+  },
+];
+
+const FORGIVEN_MSG = `
+我知道一个网页改变不了什么，<br>
+但我想让你知道——<br><br>
+每一条道歉都是认真的，<br>
+每一张券都会兑现的。<br><br>
+以后不当鸵鸟了，<br>
+早饭也不会再让你饿着了。<br><br>
+谢谢你愿意给我机会 💕<br>
+<span style="font-size:12px;color:var(--text-light);margin-top:12px;display:block;">—— 你的笨蛋</span>
+`;
+
+// ── DOM ──
+const $ = id => document.getElementById(id);
+const launcher = $('launcher');
+const stage = $('stage');
+const fainted = $('fainted');
+const forgiven = $('forgiven');
+const charCard = $('charCard');
+const charEmoji = $('charEmoji');
+const charAction = $('charAction');
+const speechBubble = $('speechBubble');
+const giftIcon = $('giftIcon');
+const giftText = $('giftText');
+const giftCard = $('giftCard');
+const countNum = $('countNum');
+const countTotal = $('countTotal');
+const forgiveBtn = $('forgiveBtn');
+const forgivenMsg = $('forgivenMsg');
+
+// ── 状态 ──
+let opened = false;
+let triggerCount = 0;
+let seenSet = new Set();
+let isFainted = false;
+const FAINT_THRESHOLD = 12;
+
+countTotal.textContent = APOLOGIES.length;
+
+// ── 飘落爱心背景 ──
+function createHearts() {
+  const bg = $('heartsBg');
+  const hearts = ['💕','💗','💖','🩷','♥️','🤍'];
+  for(let i=0;i<15;i++){
+    const h = document.createElement('div');
+    h.className = 'heart-float';
+    h.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+    h.style.left = Math.random()*100+'%';
+    h.style.animationDuration = (6+Math.random()*8)+'s';
+    h.style.animationDelay = Math.random()*10+'s';
+    h.style.fontSize = (14+Math.random()*16)+'px';
+    bg.appendChild(h);
+  }
+}
+createHearts();
+
+// ── 爱心爆炸效果 ──
+function burstLove(x,y){
+  const emojis = ['💕','💗','💖','✨','🌟','💝'];
+  for(let i=0;i<6;i++){
+    const el = document.createElement('div');
+    el.className = 'love-burst';
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left = (x + (Math.random()-0.5)*80) + 'px';
+    el.style.top = (y + (Math.random()-0.5)*40) + 'px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 1000);
+  }
+}
+
+// ── 显示界面 ──
+function showScreen(name){
+  launcher.style.display = name==='launcher'?'block':'none';
+  stage.style.display = name==='stage'?'block':'none';
+  fainted.style.display = name==='fainted'?'block':'none';
+  forgiven.style.display = name==='forgiven'?'block':'none';
+  var kicked = document.getElementById('kicked');
+  if(kicked) kicked.style.display = name==='kicked'?'block':'none';
+}
+
+// ── 随机选一个道歉 ──
+function pickApology(){
+  // 优先选没见过的
+  const unseen = APOLOGIES.filter((_,i)=>!seenSet.has(i));
+  let pool = unseen.length > 0 ? unseen : APOLOGIES;
+  const item = pool[Math.floor(Math.random()*pool.length)];
+  const idx = APOLOGIES.indexOf(item);
+  seenSet.add(idx);
+  return item;
+}
+
+// ── 触发道歉 ──
+function triggerApology(fromShake){
+  if(isFainted) return;
+  triggerCount++;
+
+  // 检查晕倒
+  if(triggerCount >= FAINT_THRESHOLD){
+    isFainted = true;
+    showScreen('fainted');
+    return;
+  }
+
+  const a = pickApology();
+  charEmoji.textContent = a.emoji;
+  charAction.textContent = a.action;
+  speechBubble.textContent = a.msg;
+  giftIcon.textContent = a.giftIcon;
+  giftText.textContent = a.giftText;
+  countNum.textContent = seenSet.size;
+
+  // 特殊动画
+  charCard.classList.remove('ostrich-anim','shake-feedback');
+  void charCard.offsetWidth; // reflow
+  if(a.special === 'ostrich') charCard.classList.add('ostrich-anim');
+  if(fromShake) charCard.classList.add('shake-feedback');
+
+  // 重新触发弹出动画
+  charCard.style.animation = 'none';
+  void charCard.offsetWidth;
+  charCard.style.animation = '';
+
+  if(!opened){
+    opened = true;
+    showScreen('stage');
+  }
+}
+
+// ── 点击触发 ──
+document.addEventListener('click', (e) => {
+  if(isFainted || forgiven.style.display==='block') return;
+  burstLove(e.clientX, e.clientY);
+  triggerApology(false);
+});
+document.addEventListener('touchstart', (e) => {
+  if(isFainted || forgiven.style.display==='block') return;
+  const t = e.touches[0];
+  burstLove(t.clientX, t.clientY);
+  // 点击由 click 事件处理，这里只做爱心效果
+}, {passive:true});
+
+// ── 摇一摇检测 ──
+let lastShakeTime = 0;
+const SHAKE_THRESHOLD = 20;
+let lastX=0, lastY=0, lastZ=0;
+
+if(window.DeviceMotionEvent){
+  // iOS 13+ 需要请求权限
+  if(typeof DeviceMotionEvent.requestPermission === 'function'){
+    document.addEventListener('click', function reqPerm(){
+      DeviceMotionEvent.requestPermission().then(state=>{
+        if(state==='granted') window.addEventListener('devicemotion', onMotion);
+      }).catch(()=>{});
+      document.removeEventListener('click', reqPerm);
+    }, {once:true});
+  } else {
+    window.addEventListener('devicemotion', onMotion);
+  }
+}
+
+function onMotion(e){
+  const acc = e.accelerationIncludingGravity;
+  if(!acc) return;
+  const x=acc.x||0, y=acc.y||0, z=acc.z||0;
+  const delta = Math.abs(x-lastX)+Math.abs(y-lastY)+Math.abs(z-lastZ);
+  lastX=x; lastY=y; lastZ=z;
+
+  if(delta > SHAKE_THRESHOLD){
+    const now = Date.now();
+    if(now - lastShakeTime > 600){ // 防抖
+      lastShakeTime = now;
+      triggerApology(true);
+      // 震动反馈
+      if(navigator.vibrate) navigator.vibrate(100);
+    }
+  }
+}
+
+// ── 原谅按钮 ──
+forgiveBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  forgivenMsg.innerHTML = FORGIVEN_MSG;
+  showScreen('forgiven');
+  // 大量爱心
+  for(let i=0;i<20;i++){
+    setTimeout(()=>{
+      burstLove(
+        Math.random()*window.innerWidth,
+        Math.random()*window.innerHeight
+      );
+    }, i*100);
+  }
+});
+
+// ── 踢飞逻辑 ──
+let kickCount = 0;
+const DESTINATIONS = [
+  {name:'月球背面', dist:1.3, unit:'光秒'},
+  {name:'火星', dist:12.7, unit:'光分'},
+  {name:'木星', dist:43.2, unit:'光分'},
+  {name:'冥王星', dist:5.5, unit:'光时'},
+  {name:'太阳系边缘', dist:1.5, unit:'光年'},
+  {name:'比邻星', dist:4.24, unit:'光年'},
+  {name:'银河系中心', dist:26000, unit:'光年'},
+  {name:'仙女座星系', dist:254, unit:'万光年'},
+  {name:'室女座超星系团', dist:5400, unit:'万光年'},
+  {name:'可观测宇宙边缘', dist:465, unit:'亿光年'},
+  {name:'平行宇宙', dist:'∞', unit:''},
+  {name:'她的心里（绕了一大圈回来了）', dist:'💕', unit:''},
+];
+const KICK_CRIES = [
+  '😭 "我在太空好冷，原谅我吧——"',
+  '🥶 "这里没有氧气...但没有你更让我窒息..."',
+  '😱 "救命！我被外星人围观了！"',
+  '🤧 "太空里打喷嚏会转圈圈...好晕..."',
+  '😢 "我看到地球了...好想回到你身边..."',
+  '🫠 "我快要被黑洞吸进去了...只有你能救我..."',
+  '👽 "外星人问我为什么被踢...我说因为我是笨蛋..."',
+  '🌌 "银河好美...但没有你在身边看有什么意义..."',
+  '🥺 "我保证以后做早饭...让我回去吧..."',
+  '😭 "我已经反省了一万光年了...够了吧..."',
+  '🛸 "外星人都看不下去了，说让我回去道歉..."',
+  '💫 "到了平行宇宙...每个宇宙的我都在道歉..."',
+];
+
+function createStars(){
+  var layer = document.getElementById('starsLayer');
+  layer.innerHTML = '';
+  for(var i=0;i<60;i++){
+    var s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    var size = 1+Math.random()*3;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.animationDelay = Math.random()*2+'s';
+    layer.appendChild(s);
+  }
+}
+
+function playKickAnimation(isAgain){
+  var ch = document.getElementById('kickedChar');
+  var txt = document.getElementById('kickedText');
+  var loc = document.getElementById('kickedLocation');
+  var distEl = document.getElementById('kickedDistance');
+  var distNum = document.getElementById('distNum');
+  var cry = document.getElementById('kickedCry');
+  var btns = document.getElementById('kickedBtns');
+
+  btns.style.display = 'none';
+  ch.className = 'kicked-char';
+  ch.textContent = ['🧎‍♂️','😭','🤡','🥺','😱'][Math.floor(Math.random()*5)];
+  void ch.offsetWidth;
+
+  var dest = DESTINATIONS[Math.min(kickCount, DESTINATIONS.length-1)];
+  txt.textContent = kickCount===0 ? '嗖————！！！' : '又飞了————！！！';
+  loc.textContent = '正在飞向：' + dest.name + '...';
+  cry.textContent = KICK_CRIES[Math.min(kickCount, KICK_CRIES.length-1)];
+
+  ch.classList.add(isAgain ? 'kick-anim-again' : 'kick-anim');
+
+  // 距离计数动画
+  var targetDist = typeof dest.dist === 'number' ? dest.dist : 0;
+  var current = 0;
+  var steps = 30;
+  var stepTime = 60;
+  var interval = setInterval(function(){
+    current += targetDist/steps;
+    if(current >= targetDist){ current = targetDist; clearInterval(interval); }
+    distNum.textContent = typeof dest.dist === 'string' ? dest.dist : current.toFixed(current<10?1:0);
+  }, stepTime);
+  distEl.innerHTML = '已飞行：<span id="distNum">0</span> ' + dest.unit;
+
+  // 2秒后显示按钮
+  setTimeout(function(){
+    btns.style.display = 'flex';
+    // 最后一个目的地（回到心里）自动触发原谅
+    if(kickCount >= DESTINATIONS.length-1){
+      btns.innerHTML = '<button class="forgive-btn" id="autoForgiveBtn">💕 他绕了一圈回来了...算了原谅吧</button>';
+      document.getElementById('autoForgiveBtn').addEventListener('click', function(ev){ ev.stopPropagation(); document.getElementById('kickForgiveBtn').click(); });
+    }
+  }, 2200);
+}
+
+document.getElementById('kickBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  kickCount = 0;
+  createStars();
+  showScreen('kicked');
+  setTimeout(function(){ playKickAnimation(false); }, 300);
+});
+
+document.getElementById('kickAgainBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  kickCount++;
+  playKickAnimation(true);
+});
+
+document.getElementById('kickForgiveBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  forgivenMsg.innerHTML = FORGIVEN_MSG.replace('谢谢你愿意原谅我', kickCount > 3 ? '你把我踢了'+kickCount+'次...但谢谢你最终接我回来了' : '谢谢你愿意原谅我');
+  showScreen('forgiven');
+  for(var i=0;i<25;i++){
+    setTimeout(function(){
+      burstLove(Math.random()*window.innerWidth, Math.random()*window.innerHeight);
+    }, i*80);
+  }
+});
+
+// 初始化
+showScreen('launcher');
+
+})();
+
+// ── BGM 控制 ──
+(function(){
+  var audio = document.getElementById('bgmAudio');
+  var btn = document.getElementById('bgmBtn');
+  var isPlaying = false;
+  audio.volume = 0.3;
+
+  function toggleBGM(e){
+    e.stopPropagation();
+    if(isPlaying){
+      audio.pause();
+      btn.textContent = '🔇';
+      btn.classList.remove('playing');
+    } else {
+      audio.play().then(function(){
+        btn.textContent = '🎵';
+        btn.classList.add('playing');
+      }).catch(function(){});
+    }
+    isPlaying = !isPlaying;
+  }
+
+  btn.addEventListener('click', toggleBGM);
+
+  // 首次点击页面时自动播放
+  var autoPlayOnce = function(){
+    if(!isPlaying){
+      audio.play().then(function(){
+        isPlaying = true;
+        btn.textContent = '🎵';
+        btn.classList.add('playing');
+      }).catch(function(){});
+    }
+    document.removeEventListener('click', autoPlayOnce);
+    document.removeEventListener('touchstart', autoPlayOnce);
+  };
+  document.addEventListener('click', autoPlayOnce);
+  document.addEventListener('touchstart', autoPlayOnce);
+})();
+
+</script>
+</body>
+</html>
